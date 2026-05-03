@@ -34,12 +34,12 @@
   @keyframes pd { 0%,100%{opacity:1} 50%{opacity:0.3} }
   .status-text { font-size: 12px; color: var(--muted); }
   .next-check { font-size: 11px; color: var(--muted); }
-  .wind-main { display: flex; align-items: flex-end; justify-content: center; gap: 40px; padding: 16px 0 20px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+  .wind-main { display: flex; align-items: center; justify-content: flex-start; gap: 36px; padding: 16px 0 20px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
   .wind-block { text-align: center; }
   .wind-label { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
   .wind-value { font-family: 'Syne', sans-serif; font-weight: 800; line-height: 1; transition: color 0.5s; }
-  .wind-value.big { font-size: 68px; }
-  .wind-value.med { font-size: 44px; }
+  .wind-value.big { font-size: 96px; }
+  .wind-value.med { font-size: 38px; color: #ffffff !important; }
   .wind-unit { font-size: 12px; color: var(--muted); margin-top: 4px; }
   .bf-0{color:#94a3b8} .bf-1{color:#34d399} .bf-2{color:#34d399}
   .bf-3{color:#fbbf24} .bf-4{color:#fb923c} .bf-5{color:#f87171}
@@ -120,14 +120,14 @@
     </div>
     <div class="wind-main">
       <div class="wind-block">
-        <div class="wind-label">Wind Speed</div>
-        <div class="wind-value big" id="windKmh">--</div>
-        <div class="wind-unit">km/h</div>
+        <div class="wind-label">Beaufort</div>
+        <div class="wind-value big" id="windBf">--</div>
+        <div class="wind-unit">BF</div>
       </div>
       <div class="wind-block">
-        <div class="wind-label">Beaufort</div>
-        <div class="wind-value med" id="windBf">--</div>
-        <div class="wind-unit">BF</div>
+        <div class="wind-label">Wind Speed</div>
+        <div class="wind-value med" id="windKmh">--</div>
+        <div class="wind-unit">km/h</div>
       </div>
     </div>
     <div class="bf-band" id="bfBand">— Waiting for data —</div>
@@ -208,7 +208,7 @@
   function addLog(msg,isAlert=false){const t=new Date().toTimeString().slice(0,5);const el=document.createElement('div');el.className='log-entry'+(isAlert?' wind-alert':'');el.innerHTML=`<span class="time">${t}</span><span>${msg}</span>`;const log=document.getElementById('logEntries');log.insertBefore(el,log.firstChild);while(log.children.length>20)log.removeChild(log.lastChild);}
   function setStatus(type,text){document.getElementById('statusDot').className='status-dot '+type;document.getElementById('statusText').textContent=text;}
   function startCountdown(){secondsLeft=CHECK_INTERVAL/1000;clearInterval(countdown);countdown=setInterval(()=>{secondsLeft--;const m=Math.floor(secondsLeft/60),s=secondsLeft%60;document.getElementById('nextCheck').textContent=`Next: ${m}:${s.toString().padStart(2,'0')}`;if(secondsLeft<=0)clearInterval(countdown);},1000);}
-  async function fetchWeather(){document.getElementById('errorMsg').classList.remove('show');let data=null,lastErr=null;for(let i=0;i<PROXIES.length;i++){try{const r=await fetch(PROXIES[i](TARGET_URL),{headers:{'Accept':'application/json'}});if(!r.ok)throw new Error(`HTTP ${r.status}`);data=JSON.parse(await r.text());break;}catch(e){lastErr=e;}}if(!data){setStatus('error','Check failed');document.getElementById('errorMsg').textContent='⚠ Could not fetch data.';document.getElementById('errorMsg').classList.add('show');addLog('Error: '+(lastErr?lastErr.message:'unknown'));return;}try{const obs=data.observations[0],m=obs.metric;const kmh=m.windSpeed??0,gust=m.windGust??0,dir=obs.winddir??0,temp=m.temp;const bfInfo=toBf(kmh),bf=bfInfo.bf;const t=new Date().toTimeString().slice(0,5);document.getElementById('windKmh').textContent=kmh.toFixed(1);document.getElementById('windKmh').className=`wind-value big bf-${bf}`;document.getElementById('windBf').textContent=bf;document.getElementById('windBf').className=`wind-value med bf-${bf}`;document.getElementById('gustVal').textContent=gust.toFixed(1)+' km/h';document.getElementById('dirVal').textContent=toDir(dir);document.getElementById('tempVal').textContent=temp+'°C';const band=document.getElementById('bfBand');band.textContent=`BF ${bf} — ${bfInfo.desc}`;band.style.color=bfInfo.color;band.style.borderColor=bfInfo.color+'55';band.style.background=bfInfo.color+'11';highlightRow(bf);pushChart(kmh,bf,t);const isAbove=bf>=ALERT_BF;if(isAbove){setStatus('wind-alert',`Wind alert! BF ${bf} — ${bfInfo.desc}`);document.getElementById('alertBanner').classList.add('show');document.getElementById('alertMsg').textContent=`${kmh.toFixed(1)} km/h · BF ${bf} · Gusts: ${gust.toFixed(1)} km/h · ${toDir(dir)}`;addLog(`💨 ALERT BF ${bf} — ${kmh.toFixed(1)} km/h from ${toDir(dir)}`,true);if(!wasAbove)sendNotif(bf,kmh,bfInfo.desc,toDir(dir));}else{setStatus('online',`Online · BF ${bf} · ${bfInfo.desc}`);document.getElementById('alertBanner').classList.remove('show');if(wasAbove)addLog(`Wind calmed · BF ${bf} · ${kmh.toFixed(1)} km/h`);else addLog(`OK · BF ${bf} · ${kmh.toFixed(1)} km/h · ${toDir(dir)}`);}wasAbove=isAbove;}catch(e){setStatus('error','Parse error');addLog('Parse error: '+e.message);}}
+  async function fetchWeather(){document.getElementById('errorMsg').classList.remove('show');let data=null,lastErr=null;for(let i=0;i<PROXIES.length;i++){try{const r=await fetch(PROXIES[i](TARGET_URL),{headers:{'Accept':'application/json'}});if(!r.ok)throw new Error(`HTTP ${r.status}`);data=JSON.parse(await r.text());break;}catch(e){lastErr=e;}}if(!data){setStatus('error','Check failed');document.getElementById('errorMsg').textContent='⚠ Could not fetch data.';document.getElementById('errorMsg').classList.add('show');addLog('Error: '+(lastErr?lastErr.message:'unknown'));return;}try{const obs=data.observations[0];const m=obs.metric||{};const kmh=parseFloat(m.windSpeed)||0;const gust=parseFloat(m.windGust)||0;const dir=parseFloat(obs.winddir)||parseFloat(m.winddir)||0;const temp=m.temp!=null?m.temp:'--';const bfInfo=toBf(kmh),bf=bfInfo.bf;const t=new Date().toTimeString().slice(0,5);document.getElementById('windKmh').textContent=kmh.toFixed(1);document.getElementById('windKmh').className=`wind-value med`;document.getElementById('windBf').textContent=bf;document.getElementById('windBf').className=`wind-value big bf-${bf}`;document.getElementById('gustVal').textContent=gust.toFixed(1)+' km/h';document.getElementById('dirVal').textContent=toDir(dir);document.getElementById('tempVal').textContent=temp+'°C';const band=document.getElementById('bfBand');band.textContent=`BF ${bf} — ${bfInfo.desc}`;band.style.color=bfInfo.color;band.style.borderColor=bfInfo.color+'55';band.style.background=bfInfo.color+'11';highlightRow(bf);pushChart(kmh,bf,t);const isAbove=bf>=ALERT_BF;if(isAbove){setStatus('wind-alert',`Wind alert! BF ${bf} — ${bfInfo.desc}`);document.getElementById('alertBanner').classList.add('show');document.getElementById('alertMsg').textContent=`${kmh.toFixed(1)} km/h · BF ${bf} · Gusts: ${gust.toFixed(1)} km/h · ${toDir(dir)}`;addLog(`💨 ALERT BF ${bf} — ${kmh.toFixed(1)} km/h from ${toDir(dir)}`,true);if(!wasAbove)sendNotif(bf,kmh,bfInfo.desc,toDir(dir));}else{setStatus('online',`Online · BF ${bf} · ${bfInfo.desc}`);document.getElementById('alertBanner').classList.remove('show');if(wasAbove)addLog(`Wind calmed · BF ${bf} · ${kmh.toFixed(1)} km/h`);else addLog(`OK · BF ${bf} · ${kmh.toFixed(1)} km/h · ${toDir(dir)}`);}wasAbove=isAbove;}catch(e){setStatus('error','Parse error: '+e.message);addLog('Parse error: '+e.message+' — raw: '+JSON.stringify(data).slice(0,80));}}
   function sendNotif(bf,kmh,desc,dir){if(Notification.permission==='granted')new Notification(`💨 Wind Alert IORTHO1 — BF ${bf}!`,{body:`${desc} · ${kmh.toFixed(1)} km/h from ${dir}`});}
   async function requestNotifPermission(){const p=await Notification.requestPermission();if(p==='granted'){document.getElementById('notifBar').classList.remove('show');addLog('Notifications enabled ✓');}}
   async function checkNow(){addLog('Manual check...');await fetchWeather();if(isRunning)startCountdown();}
