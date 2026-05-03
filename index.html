@@ -115,17 +115,17 @@
       <div class="next-check" id="nextCheck"></div>
     </div>
 
-    <!-- Precip Today — big, on top -->
+    <!-- Rain Today — big, on top, green -->
     <div class="precip-display">
-      <div class="precip-label">Precip Today</div>
-      <div class="precip-value" id="accumVal">--</div>
+      <div class="precip-label">Rain Today</div>
+      <div class="precip-value" style="color:var(--dry);" id="accumVal">--</div>
       <div class="precip-unit">mm</div>
     </div>
 
-    <!-- Precip Rate — below -->
+    <!-- Precip Rate — below, white -->
     <div class="precip-display" style="padding-top:16px;">
       <div class="precip-label">Precip Rate</div>
-      <div class="precip-value" style="font-size:44px;" id="precipValue">--</div>
+      <div class="precip-value" style="font-size:44px;color:var(--text);" id="precipValue">--</div>
       <div class="precip-unit">mm / hr</div>
     </div>
 
@@ -309,7 +309,6 @@
 
       var precipEl = document.getElementById('precipValue');
       precipEl.textContent = precipRate.toFixed(1);
-      precipEl.className   = 'precip-value ' + (precipRate > 0 ? 'raining' : 'dry');
 
       document.getElementById('tempVal').textContent   = temp + ' °C';
       document.getElementById('humidVal').textContent  = humidity + ' %';
