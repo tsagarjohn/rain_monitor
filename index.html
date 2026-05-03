@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rain Monitor – IORTHO1</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f1a; --panel: #111827; --border: #1e2d45;
+    --accent: #38bdf8; --accent2: #0ea5e9; --rain: #7dd3fc;
+    --dry: #34d399; --warn: #fbbf24; --text: #e2e8f0;
+    --muted: #64748b; --error: #f87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 24px; position: relative; overflow-x: hidden;
+  }
+  .rain-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .drop {
+    position: absolute; width: 1px;
+    background: linear-gradient(to bottom, transparent, rgba(56,189,248,0.15));
+    animation: fall linear infinite; top: -100px;
+  }
+  @keyframes fall { to { transform: translateY(110vh); opacity: 0; } }
+  .container { position: relative; z-index: 1; width: 100%; max-width: 480px; }
+  header { margin-bottom: 32px; text-align: center; }
+  .station-label {
+    font-family: 'Syne', sans-serif; font-size: 11px;
+    letter-spacing: 4px; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 8px;
+  }
+  h1 { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: var(--text); line-height: 1; }
+  h1 span { color: var(--accent); }
+  .subtitle { margin-top: 8px; font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 16px; }
+  .status-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); display: inline-block; margin-right: 8px; transition: background 0.4s; }
+  .status-dot.online { background: var(--dry); box-shadow: 0 0 8px var(--dry); animation: pulse-dot 2s infinite; }
+  .status-dot.rain { background: var(--rain); box-shadow: 0 0 8px var(--rain); animation: pulse-dot 1s infinite; }
+  .status-dot.error { background: var(--error); }
+  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .status-text { font-size: 12px; color: var(--muted); }
+  .next-check { font-size: 11px; color: var(--muted); text-align: right; }
+  .precip-display { text-align: center; padding: 24px 0 16px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .precip-label { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .precip-value { font-family: 'Syne', sans-serif; font-size: 64px; font-weight: 800; color: var(--text); line-height: 1; transition: color 0.5s; }
+  .precip-value.raining { color: var(--rain); }
+  .precip-value.dry { color: var(--dry); }
+  .precip-unit { font-size: 14px; color: var(--muted); margin-top: 4px; }
+  .weather-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .weather-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+  .weather-item-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .weather-item-value { font-size: 18px; font-weight: 500; color: var(--text); }
+  .alert-banner {
+    background: rgba(56,189,248,0.1); border: 1px solid var(--accent);
+    border-radius: 12px; padding: 16px 20px; font-size: 13px; color: var(--accent);
+    display: none; align-items: center; gap: 12px; margin-bottom: 16px;
+    animation: slideIn 0.4s ease;
+  }
+  .alert-banner.show { display: flex; }
+  .alert-banner .icon { font-size: 24px; }
+  @keyframes slideIn { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+  .controls { display: flex; gap: 10px; }
+  button {
+    flex: 1; padding: 14px; border-radius: 10px; border: none;
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    letter-spacing: 1px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-primary { background: var(--accent); color: #0a0f1a; font-weight: 500; }
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+  .btn-secondary { background: transparent; border: 1px solid var(--border) !important; color: var(--muted); }
+  .btn-secondary:hover { border-color: var(--accent) !important; color: var(--accent); }
+  .log-card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 16px 20px; margin-top: 16px; }
+  .log-title { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .log-entries { max-height: 140px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+  .log-entry { font-size: 11px; color: var(--muted); padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.03); display: flex; gap: 10px; }
+  .log-entry .time { color: var(--accent); min-width: 55px; }
+  .log-entry.rain-event { color: var(--rain); }
+  .log-entry.rain-event .time { color: var(--rain); }
+  .notif-bar {
+    background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.3);
+    border-radius: 10px; padding: 12px 16px; font-size: 11px; color: var(--warn);
+    margin-bottom: 16px; display: none; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .notif-bar.show { display: flex; }
+  .notif-bar button { flex: none; padding: 6px 14px; background: var(--warn); color: #0a0f1a; border-radius: 6px; font-size: 10px; }
+  .error-msg { font-size: 11px; color: var(--error); text-align: center; margin-top: 8px; display: none; }
+  .error-msg.show { display: block; }
+  .api-note { font-size: 10px; color: var(--muted); text-align: center; margin-top: 12px; line-height: 1.8; }
+</style>
+</head>
+<body>
+
+<div class="rain-bg" id="rainBg"></div>
+
+<div class="container">
+  <header>
+    <div class="station-label">PWS Monitor</div>
+    <h1>IORTHO<span>1</span></h1>
+    <div class="subtitle">Pateles · Orthounio, GR · 485m</div>
+  </header>
+
+  <div class="notif-bar" id="notifBar">
+    <span>⚠ Enable notifications for rain alerts</span>
+    <button onclick="requestNotifPermission()">Enable</button>
+  </div>
+
+  <div class="alert-banner" id="alertBanner">
+    <span class="icon">🌧</span>
+    <div>
+      <strong>Rain detected!</strong><br>
+      <span id="alertMsg" style="font-size:11px;opacity:0.8;"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="status-row">
+      <div>
+        <span class="status-dot" id="statusDot"></span>
+        <span class="status-text" id="statusText">Waiting to start...</span>
+      </div>
+      <div class="next-check" id="nextCheck"></div>
+    </div>
+
+    <div class="precip-display">
+      <div class="precip-label">Precip Rate</div>
+      <div class="precip-value" id="precipValue">--</div>
+      <div class="precip-unit">mm / hr</div>
+    </div>
+
+    <div class="weather-grid">
+      <div class="weather-item">
+        <div class="weather-item-label">Temperature</div>
+        <div class="weather-item-value" id="tempVal">--</div>
+      </div>
+      <div class="weather-item">
+        <div class="weather-item-label">Humidity</div>
+        <div class="weather-item-value" id="humidVal">--</div>
+      </div>
+      <div class="weather-item">
+        <div class="weather-item-label">Precip Today</div>
+        <div class="weather-item-value" id="accumVal">--</div>
+      </div>
+      <div class="weather-item">
+        <div class="weather-item-label">Wind</div>
+        <div class="weather-item-value" id="windVal">--</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="error-msg" id="errorMsg"></div>
+
+  <div class="controls">
+    <button class="btn-primary" id="startBtn" onclick="toggleMonitor()">▶ Start Monitoring</button>
+    <button class="btn-secondary" onclick="checkNow()">Check Now</button>
+  </div>
+
+  <div class="log-card">
+    <div class="log-title">Activity Log</div>
+    <div class="log-entries" id="logEntries">
+      <div class="log-entry"><span class="time">--:--</span><span>Monitor not started</span></div>
+    </div>
+  </div>
+
+  <div class="api-note">
+    PWS IORTHO1 · Checks every 5 minutes<br>
+    Keep this tab open to receive alerts
+  </div>
+</div>
+
+<script>
+  const API_KEY    = 'D1H2w36a';
+  const STATION_ID = 'IORTHO1';
+  const CHECK_INTERVAL = 5 * 60 * 1000;
+
+  // Try multiple CORS proxies in order
+  const PROXIES = [
+    (url) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+    (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    (url) => `https://thingproxy.freeboard.io/fetch/${url}`,
+  ];
+
+  const TARGET_URL = `https://api.weather.com/v2/pws/observations/current?stationId=${STATION_ID}&format=json&units=m&apiKey=${API_KEY}`;
+
+  let monitorInterval = null;
+  let countdown = null;
+  let secondsLeft = 0;
+  let isRunning = false;
+  let wasRaining = false;
+  let currentProxy = 0;
+
+  // Rain drops
+  const rainBg = document.getElementById('rainBg');
+  for (let i = 0; i < 40; i++) {
+    const d = document.createElement('div');
+    d.className = 'drop';
+    d.style.left = Math.random() * 100 + '%';
+    d.style.height = (Math.random() * 60 + 40) + 'px';
+    d.style.animationDuration = (Math.random() * 1.5 + 0.8) + 's';
+    d.style.animationDelay = (Math.random() * 3) + 's';
+    d.style.opacity = Math.random() * 0.5 + 0.1;
+    rainBg.appendChild(d);
+  }
+
+  function addLog(msg, isRain = false) {
+    const time = new Date().toTimeString().slice(0, 5);
+    const el = document.createElement('div');
+    el.className = 'log-entry' + (isRain ? ' rain-event' : '');
+    el.innerHTML = `<span class="time">${time}</span><span>${msg}</span>`;
+    const log = document.getElementById('logEntries');
+    log.insertBefore(el, log.firstChild);
+    while (log.children.length > 20) log.removeChild(log.lastChild);
+  }
+
+  function setStatus(type, text) {
+    document.getElementById('statusDot').className = 'status-dot ' + type;
+    document.getElementById('statusText').textContent = text;
+  }
+
+  function startCountdown() {
+    secondsLeft = CHECK_INTERVAL / 1000;
+    clearInterval(countdown);
+    countdown = setInterval(() => {
+      secondsLeft--;
+      const m = Math.floor(secondsLeft / 60);
+      const s = secondsLeft % 60;
+      document.getElementById('nextCheck').textContent = `Next: ${m}:${s.toString().padStart(2,'0')}`;
+      if (secondsLeft <= 0) clearInterval(countdown);
+    }, 1000);
+  }
+
+  async function tryFetch(proxyIndex) {
+    const proxyUrl = PROXIES[proxyIndex](TARGET_URL);
+    const res = await fetch(proxyUrl, { headers: { 'Accept': 'application/json' } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    return JSON.parse(text);
+  }
+
+  async function fetchWeather() {
+    document.getElementById('errorMsg').classList.remove('show');
+    let data = null;
+    let lastErr = null;
+
+    // Try each proxy until one works
+    for (let i = 0; i < PROXIES.length; i++) {
+      try {
+        data = await tryFetch(i);
+        currentProxy = i;
+        break;
+      } catch (err) {
+        lastErr = err;
+      }
+    }
+
+    if (!data) {
+      setStatus('error', 'Check failed');
+      const errEl = document.getElementById('errorMsg');
+      errEl.textContent = '⚠ Could not fetch data. Check your internet connection or API key.';
+      errEl.classList.add('show');
+      addLog('Error: ' + (lastErr ? lastErr.message : 'unknown'));
+      return;
+    }
+
+    try {
+      const obs = data.observations[0];
+      const metric = obs.metric;
+      const precipRate  = metric.precipRate  ?? 0;
+      const precipTotal = metric.precipTotal ?? 0;
+      const temp        = metric.temp;
+      const humidity    = obs.humidity;
+      const windSpeed   = metric.windSpeed;
+
+      const precipEl = document.getElementById('precipValue');
+      precipEl.textContent = precipRate.toFixed(1);
+      precipEl.className   = 'precip-value ' + (precipRate > 0 ? 'raining' : 'dry');
+      document.getElementById('tempVal').textContent  = temp + ' °C';
+      document.getElementById('humidVal').textContent = humidity + ' %';
+      document.getElementById('accumVal').textContent = precipTotal.toFixed(1) + ' mm';
+      document.getElementById('windVal').textContent  = windSpeed + ' km/h';
+
+      const isRaining = precipRate > 0;
+
+      if (isRaining) {
+        setStatus('rain', 'Station online · Rain detected!');
+        document.getElementById('alertBanner').classList.add('show');
+        document.getElementById('alertMsg').textContent = `Rate: ${precipRate.toFixed(1)} mm/hr · Total today: ${precipTotal.toFixed(1)} mm`;
+        addLog(`🌧 RAIN — ${precipRate.toFixed(1)} mm/hr`, true);
+        if (!wasRaining) sendNotification(precipRate, precipTotal);
+      } else {
+        setStatus('online', 'Station online · No rain');
+        document.getElementById('alertBanner').classList.remove('show');
+        if (wasRaining) addLog('Rain stopped · All clear');
+        else addLog(`OK · Dry · ${temp}°C · ${humidity}%`);
+      }
+
+      wasRaining = isRaining;
+
+    } catch (e) {
+      setStatus('error', 'Data parse error');
+      addLog('Parse error: ' + e.message);
+    }
+  }
+
+  function sendNotification(rate, total) {
+    if (Notification.permission === 'granted') {
+      new Notification('🌧 Rain at IORTHO1!', {
+        body: `Rate: ${rate.toFixed(1)} mm/hr · Total: ${total.toFixed(1)} mm`,
+        icon: 'https://www.wunderground.com/favicon.ico'
+      });
+    }
+  }
+
+  async function requestNotifPermission() {
+    const perm = await Notification.requestPermission();
+    if (perm === 'granted') {
+      document.getElementById('notifBar').classList.remove('show');
+      addLog('Notifications enabled ✓');
+    }
+  }
+
+  function checkNotifStatus() {
+    if ('Notification' in window && Notification.permission !== 'granted') {
+      document.getElementById('notifBar').classList.add('show');
+    }
+  }
+
+  async function checkNow() {
+    addLog('Manual check...');
+    await fetchWeather();
+    if (isRunning) startCountdown();
+  }
+
+  function toggleMonitor() {
+    const btn = document.getElementById('startBtn');
+    if (!isRunning) {
+      isRunning = true;
+      btn.textContent = '⏹ Stop Monitoring';
+      addLog('Monitoring started · every 5 min');
+      fetchWeather();
+      startCountdown();
+      monitorInterval = setInterval(() => { fetchWeather(); startCountdown(); }, CHECK_INTERVAL);
+    } else {
+      isRunning = false;
+      clearInterval(monitorInterval);
+      clearInterval(countdown);
+      btn.textContent = '▶ Start Monitoring';
+      document.getElementById('nextCheck').textContent = '';
+      setStatus('', 'Monitoring stopped');
+      addLog('Monitoring stopped');
+    }
+  }
+
+  checkNotifStatus();
+</script>
+</body>
+</html>
