@@ -7,90 +7,100 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0f1a; --panel: #111827; --border: #1e2d45;
-    --accent: #a78bfa; --accent2: #7c3aed;
-    --warn: #fbbf24; --alert: #f87171;
-    --safe: #34d399; --text: #e2e8f0; --muted: #64748b;
+    --bg:#0a0f1a; --panel:#111827; --border:#1e2d45;
+    --accent:#a78bfa; --accent2:#7c3aed;
+    --warn:#fbbf24; --alert:#f87171;
+    --safe:#34d399; --text:#e2e8f0; --muted:#64748b;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg); color: var(--text);
-    font-family: 'DM Mono', monospace;
-    min-height: 100vh; display: flex; flex-direction: column;
-    align-items: center; padding: 24px; overflow-x: hidden;
-  }
-  .container { width: 100%; max-width: 520px; }
-  header { margin-bottom: 28px; text-align: center; padding-top: 8px; }
-  .station-label { font-family: 'Syne', sans-serif; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
-  h1 { font-family: 'Syne', sans-serif; font-size: 30px; font-weight: 800; color: var(--text); }
-  h1 span { color: var(--accent); }
-  .subtitle { margin-top: 8px; font-size: 11px; color: var(--muted); letter-spacing: 1px; }
-  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 14px; }
-  .status-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-  .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); display: inline-block; margin-right: 8px; }
-  .status-dot.online { background: var(--safe); box-shadow: 0 0 8px var(--safe); animation: pd 2s infinite; }
-  .status-dot.wind-alert { background: var(--alert); box-shadow: 0 0 10px var(--alert); animation: pd 0.7s infinite; }
-  .status-dot.error  { background: var(--alert); }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Mono',monospace; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:24px; overflow-x:hidden; }
+  .container { width:100%; max-width:520px; }
+  header { margin-bottom:28px; text-align:center; padding-top:8px; }
+  .station-label { font-family:'Syne',sans-serif; font-size:11px; letter-spacing:4px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  h1 { font-family:'Syne',sans-serif; font-size:30px; font-weight:800; color:var(--text); }
+  h1 span { color:var(--accent); }
+  .subtitle { margin-top:8px; font-size:11px; color:var(--muted); letter-spacing:1px; }
+
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom:14px; }
+
+  .status-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .status-dot { width:10px; height:10px; border-radius:50%; background:var(--muted); display:inline-block; margin-right:8px; }
+  .status-dot.online     { background:var(--safe);  box-shadow:0 0 8px var(--safe);  animation:pd 2s infinite; }
+  .status-dot.wind-alert { background:var(--alert); box-shadow:0 0 10px var(--alert); animation:pd 0.7s infinite; }
+  .status-dot.error      { background:var(--alert); }
   @keyframes pd { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  .status-text { font-size: 12px; color: var(--muted); }
-  .next-check { font-size: 11px; color: var(--muted); }
-  .wind-main { display: flex; align-items: center; justify-content: flex-start; gap: 36px; padding: 16px 0 20px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
-  .wind-block { text-align: center; }
-  .wind-label { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
-  .wind-value { font-family: 'Syne', sans-serif; font-weight: 800; line-height: 1; transition: color 0.5s; }
-  .wind-value.big { font-size: 96px; }
-  .wind-value.med { font-size: 38px; color: #ffffff !important; }
-  .wind-unit { font-size: 12px; color: var(--muted); margin-top: 4px; }
-  .bf-0{color:#94a3b8} .bf-1{color:#34d399} .bf-2{color:#34d399}
-  .bf-3{color:#fbbf24} .bf-4{color:#fb923c} .bf-5{color:#f87171}
-  .bf-6{color:#ef4444} .bf-7{color:#dc2626} .bf-8{color:#b91c1c}
-  .bf-9{color:#991b1b} .bf-10{color:#7f1d1d} .bf-11{color:#450a0a} .bf-12{color:#450a0a}
-  .bf-band { text-align: center; padding: 10px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; font-weight: 500; border: 1px solid var(--border); transition: all 0.5s; }
-  .info-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-  .info-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 10px; text-align: center; }
-  .info-item-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
-  .info-item-value { font-size: 15px; font-weight: 500; color: var(--text); }
-  .alert-banner { background: rgba(248,113,113,0.1); border: 1px solid var(--alert); border-radius: 12px; padding: 14px 18px; font-size: 13px; color: var(--alert); display: none; align-items: center; gap: 12px; margin-bottom: 14px; animation: si 0.4s ease; }
-  .alert-banner.show { display: flex; }
-  .alert-banner .icon { font-size: 22px; }
+  .status-text { font-size:12px; color:var(--muted); }
+  .next-check  { font-size:11px; color:var(--muted); }
+
+  .wind-main { display:flex; align-items:center; justify-content:center; gap:48px; padding:16px 0 20px; border-bottom:1px solid var(--border); margin-bottom:16px; }
+  .wind-block { text-align:center; }
+  .wind-label { font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+  .wind-value { font-family:'Syne',sans-serif; font-weight:800; line-height:1; transition:color 0.5s; }
+  .wind-value.big { font-size:72px; }
+  .wind-value.med { font-size:36px; }
+  .wind-unit  { font-size:12px; color:var(--muted); margin-top:4px; }
+  .trend-inline { margin-top:8px; font-size:13px; color:var(--muted); letter-spacing:1px; transition:color 0.4s; min-height:18px; }
+
+  .bf-0  { color:#94a3b8 } .bf-1  { color:#34d399 } .bf-2  { color:#34d399 }
+  .bf-3  { color:#fbbf24 } .bf-4  { color:#fb923c } .bf-5  { color:#f87171 }
+  .bf-6  { color:#ef4444 } .bf-7  { color:#dc2626 } .bf-8  { color:#b91c1c }
+  .bf-9  { color:#991b1b } .bf-10 { color:#7f1d1d } .bf-11 { color:#450a0a } .bf-12 { color:#450a0a }
+
+  .bf-band { text-align:center; padding:10px; border-radius:10px; margin-bottom:16px; font-size:14px; font-weight:500; border:1px solid var(--border); transition:all 0.5s; }
+
+  .info-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+  .info-item { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:10px; text-align:center; }
+  .info-item-label { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+  .info-item-value { font-size:15px; font-weight:500; color:var(--text); }
+
+  .alert-banner { background:rgba(248,113,113,0.1); border:1px solid var(--alert); border-radius:12px; padding:14px 18px; font-size:13px; color:var(--alert); display:none; align-items:center; gap:12px; margin-bottom:14px; animation:si 0.4s ease; }
+  .alert-banner.show { display:flex; }
+  .alert-banner .icon { font-size:22px; }
   @keyframes si { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
-  .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 14px; }
-  .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-  .chart-title { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
-  .trend-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--muted); }
-  .trend-badge.up { color: var(--alert); border-color: var(--alert); }
-  .trend-badge.down { color: var(--safe); border-color: var(--safe); }
-  .trend-badge.steady { color: var(--warn); border-color: var(--warn); }
-  .chart-wrap { position: relative; height: 170px; }
-  canvas { width: 100% !important; height: 170px !important; }
-  .controls { display: flex; gap: 10px; margin-bottom: 14px; }
-  button { flex: 1; padding: 13px; border-radius: 10px; border: none; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 1px; cursor: pointer; transition: all 0.2s; }
-  .btn-primary { background: var(--accent); color: #0a0f1a; font-weight: 500; }
-  .btn-primary:hover { background: var(--accent2); color: #fff; }
-  .btn-secondary { background: transparent; border: 1px solid var(--border) !important; color: var(--muted); }
-  .btn-secondary:hover { border-color: var(--accent) !important; color: var(--accent); }
-  .log-card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 16px 20px; margin-bottom: 14px; }
-  .log-title { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-  .log-entries { max-height: 120px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
-  .log-entry { font-size: 11px; color: var(--muted); padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.03); display: flex; gap: 10px; }
-  .log-entry .time { color: var(--accent); min-width: 50px; }
-  .log-entry.wind-alert { color: var(--alert); }
-  .log-entry.wind-alert .time { color: var(--alert); }
-  .notif-bar { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.3); border-radius: 10px; padding: 12px 16px; font-size: 11px; color: var(--warn); margin-bottom: 14px; display: none; align-items: center; justify-content: space-between; gap: 10px; }
-  .notif-bar.show { display: flex; }
-  .notif-bar button { flex: none; padding: 6px 14px; background: var(--warn); color: #0a0f1a; border-radius: 6px; font-size: 10px; }
-  .error-msg { font-size: 11px; color: var(--alert); text-align: center; margin-top: 4px; display: none; }
-  .error-msg.show { display: block; }
-  .section-title { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
-  .bf-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-  .bf-table th { color: var(--muted); text-align: left; padding: 4px 8px; font-weight: 400; letter-spacing: 1px; font-size: 9px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
-  .bf-table td { padding: 5px 8px; border-bottom: 1px solid rgba(255,255,255,0.03); }
-  .bf-table tr.active-row { background: rgba(167,139,250,0.12); }
-  .bf-num { font-weight: 700; }
+
+  .chart-card { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom:14px; }
+  .chart-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .chart-title { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); }
+  .trend-badge { font-size:11px; padding:3px 10px; border-radius:20px; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--muted); }
+  .trend-badge.up     { color:var(--alert); border-color:var(--alert); }
+  .trend-badge.down   { color:var(--safe);  border-color:var(--safe); }
+  .trend-badge.steady { color:var(--warn);  border-color:var(--warn); }
+  .chart-wrap { position:relative; height:170px; }
+  canvas { width:100% !important; height:170px !important; }
+
+  .controls { display:flex; gap:10px; margin-bottom:14px; }
+  button { flex:1; padding:13px; border-radius:10px; border:none; font-family:'DM Mono',monospace; font-size:12px; letter-spacing:1px; cursor:pointer; transition:all 0.2s; }
+  .btn-primary   { background:var(--accent); color:#0a0f1a; font-weight:500; }
+  .btn-primary:hover { background:var(--accent2); color:#fff; }
+  .btn-secondary { background:transparent; border:1px solid var(--border) !important; color:var(--muted); }
+  .btn-secondary:hover { border-color:var(--accent) !important; color:var(--accent); }
+
+  .log-card { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:16px 20px; margin-bottom:14px; }
+  .log-title { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+  .log-entries { max-height:120px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+  .log-entry { font-size:11px; color:var(--muted); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.03); display:flex; gap:10px; }
+  .log-entry .time { color:var(--accent); min-width:50px; }
+  .log-entry.wind-alert { color:var(--alert); }
+  .log-entry.wind-alert .time { color:var(--alert); }
+
+  .notif-bar { background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.3); border-radius:10px; padding:12px 16px; font-size:11px; color:var(--warn); margin-bottom:14px; display:none; align-items:center; justify-content:space-between; gap:10px; }
+  .notif-bar.show { display:flex; }
+  .notif-bar button { flex:none; padding:6px 14px; background:var(--warn); color:#0a0f1a; border-radius:6px; font-size:10px; }
+
+  .error-msg { font-size:11px; color:var(--alert); text-align:center; margin-top:4px; margin-bottom:8px; display:none; }
+  .error-msg.show { display:block; }
+
+  .section-title { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
+  .bf-table { width:100%; border-collapse:collapse; font-size:11px; }
+  .bf-table th { color:var(--muted); text-align:left; padding:4px 8px; font-weight:400; letter-spacing:1px; font-size:9px; text-transform:uppercase; border-bottom:1px solid var(--border); }
+  .bf-table td { padding:5px 8px; border-bottom:1px solid rgba(255,255,255,0.03); }
+  .bf-table tr.active-row { background:rgba(167,139,250,0.12); }
+  .bf-num { font-weight:700; }
 </style>
 </head>
 <body>
 <div class="container">
+
   <header>
     <div class="station-label">Wind Monitor</div>
     <h1>IORTHO<span>1</span></h1>
@@ -118,20 +128,23 @@
       </div>
       <div class="next-check" id="nextCheck"></div>
     </div>
+
     <div class="wind-main">
-      <div class="wind-block">
-        <div class="wind-label">Beaufort</div>
-        <div class="wind-value big" id="windBf">--</div>
-        <div class="wind-unit">BF</div>
-        <div id="trendInline" style="margin-top:8px;font-size:13px;color:var(--muted);letter-spacing:1px;transition:color 0.4s;">—</div>
-      </div>
       <div class="wind-block">
         <div class="wind-label">Wind Speed</div>
         <div class="wind-value med" id="windKmh">--</div>
         <div class="wind-unit">km/h</div>
       </div>
+      <div class="wind-block">
+        <div class="wind-label">Beaufort</div>
+        <div class="wind-value big" id="windBf">--</div>
+        <div class="wind-unit">BF</div>
+        <div class="trend-inline" id="trendInline">—</div>
+      </div>
     </div>
+
     <div class="bf-band" id="bfBand">— Waiting for data —</div>
+
     <div class="info-grid">
       <div class="info-item">
         <div class="info-item-label">Gust</div>
@@ -179,8 +192,8 @@
       <tr data-bf="0"><td class="bf-num bf-0">0</td><td>Calm</td><td>&lt; 1</td></tr>
       <tr data-bf="1"><td class="bf-num bf-1">1</td><td>Light Air</td><td>1 – 5</td></tr>
       <tr data-bf="2"><td class="bf-num bf-2">2</td><td>Light Breeze</td><td>6 – 11</td></tr>
-      <tr data-bf="3"><td class="bf-num bf-3">3</td><td>Gentle Breeze ⚠</td><td>12 – 19</td></tr>
-      <tr data-bf="4"><td class="bf-num bf-4">4</td><td>Moderate Breeze</td><td>20 – 28</td></tr>
+      <tr data-bf="3"><td class="bf-num bf-3">3</td><td>Gentle Breeze</td><td>12 – 19</td></tr>
+      <tr data-bf="4"><td class="bf-num bf-4">4</td><td>Moderate Breeze ⚠</td><td>20 – 28</td></tr>
       <tr data-bf="5"><td class="bf-num bf-5">5</td><td>Fresh Breeze</td><td>29 – 38</td></tr>
       <tr data-bf="6"><td class="bf-num bf-6">6</td><td>Strong Breeze</td><td>39 – 49</td></tr>
       <tr data-bf="7"><td class="bf-num bf-7">7</td><td>Near Gale</td><td>50 – 61</td></tr>
@@ -191,31 +204,315 @@
       <tr data-bf="12"><td class="bf-num bf-12">12</td><td>Hurricane</td><td>≥ 118</td></tr>
     </table>
   </div>
+
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
-  const API_KEY='96a7fe833f0c4f7fa7fe833f0cff7f97',STATION_ID='IORTHO1',CHECK_INTERVAL=3*60*1000,ALERT_BF=3.5;
-  const PROXIES=[u=>`https://corsproxy.io/?url=${encodeURIComponent(u)}`,u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,u=>`https://thingproxy.freeboard.io/fetch/${u}`];
-  const TARGET_URL=`https://api.weather.com/v2/pws/observations/current?stationId=${STATION_ID}&format=json&units=m&apiKey=${API_KEY}`;
-  const BF=[{bf:0,max:1,desc:'Calm',color:'#94a3b8'},{bf:1,max:6,desc:'Light Air',color:'#34d399'},{bf:2,max:12,desc:'Light Breeze',color:'#34d399'},{bf:3,max:20,desc:'Gentle Breeze',color:'#fbbf24'},{bf:4,max:29,desc:'Moderate Breeze',color:'#fb923c'},{bf:5,max:39,desc:'Fresh Breeze',color:'#f87171'},{bf:6,max:50,desc:'Strong Breeze',color:'#ef4444'},{bf:7,max:62,desc:'Near Gale',color:'#dc2626'},{bf:8,max:75,desc:'Gale',color:'#b91c1c'},{bf:9,max:89,desc:'Strong Gale',color:'#991b1b'},{bf:10,max:103,desc:'Storm',color:'#7f1d1d'},{bf:11,max:118,desc:'Violent Storm',color:'#450a0a'},{bf:12,max:999,desc:'Hurricane',color:'#450a0a'}];
-  const toBf=k=>BF.find(b=>k<b.max)||BF[12];
-  function toDecimalBf(kmh){const entry=toBf(kmh);const idx=BF.indexOf(entry);if(idx===0)return 0;const prev=BF[idx-1];const fraction=(kmh-prev.max)/(entry.max-prev.max);return Math.min(parseFloat((idx-1+fraction).toFixed(1)),12);};
-  const toDir=d=>['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(d/22.5)%16];
-  const labels=[],bfVals=[],kmhVals=[],MAX_PTS=20;
-  const chart=new Chart(document.getElementById('windChart').getContext('2d'),{type:'line',data:{labels,datasets:[{label:'Beaufort',data:bfVals,borderColor:'#a78bfa',backgroundColor:'rgba(167,139,250,0.08)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#a78bfa',tension:0.4,fill:true,yAxisID:'yBf'}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:400},plugins:{legend:{display:false},tooltip:{backgroundColor:'#111827',borderColor:'#1e2d45',borderWidth:1,titleColor:'#a78bfa',bodyColor:'#e2e8f0',callbacks:{label:c=>` BF ${c.parsed.y}`}}},scales:{x:{ticks:{color:'#64748b',font:{family:'DM Mono',size:9},maxRotation:0},grid:{color:'rgba(30,45,69,0.6)'}},yBf:{position:'left',min:0,max:12,ticks:{color:'#a78bfa',font:{family:'DM Mono',size:10},stepSize:1},grid:{color:'rgba(30,45,69,0.6)'},title:{display:true,text:'BF',color:'#a78bfa',font:{size:9}}}}}}});
-  function pushChart(kmh,bf,t){if(labels.length>=MAX_PTS){labels.shift();bfVals.shift();kmhVals.shift();}labels.push(t);bfVals.push(bf);kmhVals.push(kmh);chart.data.datasets[0].pointBackgroundColor=bfVals.map(v=>(BF.find(b=>v<=b.bf)||BF[12]).color);chart.update();const badge=document.getElementById('trendBadge');const inline=document.getElementById('trendInline');if(bfVals.length>=3){const a=bfVals[bfVals.length-3],b=bfVals[bfVals.length-1];if(b>a+0.3){badge.textContent='↑ Strengthening';badge.className='trend-badge up';inline.textContent='↑ rising';inline.style.color='#f87171';}else if(b<a-0.3){badge.textContent='↓ Weakening';badge.className='trend-badge down';inline.textContent='↓ falling';inline.style.color='#34d399';}else{badge.textContent='→ Steady';badge.className='trend-badge steady';inline.textContent='→ steady';inline.style.color='#fbbf24';}}}
-  function highlightRow(bf){document.querySelectorAll('#bfTable tr').forEach(r=>r.classList.remove('active-row'));const r=document.querySelector(`#bfTable tr[data-bf="${bf}"]`);if(r){r.classList.add('active-row');r.scrollIntoView({block:'nearest'});}}
-  let monitorInterval=null,countdown=null,secondsLeft=0,isRunning=false,wasAbove=false;
-  function addLog(msg,isAlert=false){const t=new Date().toTimeString().slice(0,5);const el=document.createElement('div');el.className='log-entry'+(isAlert?' wind-alert':'');el.innerHTML=`<span class="time">${t}</span><span>${msg}</span>`;const log=document.getElementById('logEntries');log.insertBefore(el,log.firstChild);while(log.children.length>20)log.removeChild(log.lastChild);}
-  function setStatus(type,text){document.getElementById('statusDot').className='status-dot '+type;document.getElementById('statusText').textContent=text;}
-  function startCountdown(){secondsLeft=CHECK_INTERVAL/1000;clearInterval(countdown);countdown=setInterval(()=>{secondsLeft--;const m=Math.floor(secondsLeft/60),s=secondsLeft%60;document.getElementById('nextCheck').textContent=`Next: ${m}:${s.toString().padStart(2,'0')}`;if(secondsLeft<=0)clearInterval(countdown);},1000);}
-  async function fetchWeather(){document.getElementById('errorMsg').classList.remove('show');let data=null,lastErr=null;for(let i=0;i<PROXIES.length;i++){try{const r=await fetch(PROXIES[i](TARGET_URL),{headers:{'Accept':'application/json'}});if(!r.ok)throw new Error(`HTTP ${r.status}`);data=JSON.parse(await r.text());break;}catch(e){lastErr=e;}}if(!data){setStatus('error','Check failed');document.getElementById('errorMsg').textContent='⚠ Could not fetch data.';document.getElementById('errorMsg').classList.add('show');addLog('Error: '+(lastErr?lastErr.message:'unknown'));return;}try{const obs=data.observations[0];const m=obs.metric||{};const kmh=parseFloat(m.windSpeed)||0;const gust=parseFloat(m.windGust)||0;const dir=parseFloat(obs.winddir)||parseFloat(m.winddir)||0;const temp=m.temp!=null?m.temp:'--';const bfInfo=toBf(kmh);const bf=toDecimalBf(kmh);const bfInt=Math.floor(bf);const t=new Date().toTimeString().slice(0,5);document.getElementById('windKmh').textContent=kmh.toFixed(1);document.getElementById('windKmh').className=`wind-value med`;document.getElementById('windBf').textContent=bf.toFixed(1);document.getElementById('windBf').className=`wind-value big bf-${bfInt}`;document.getElementById('gustVal').textContent=gust.toFixed(1)+' km/h';document.getElementById('dirVal').textContent=toDir(dir);document.getElementById('tempVal').textContent=temp+'°C';const band=document.getElementById('bfBand');band.textContent=`BF ${bf.toFixed(1)} — ${bfInfo.desc}`;band.style.color=bfInfo.color;band.style.borderColor=bfInfo.color+'55';band.style.background=bfInfo.color+'11';highlightRow(bfInt);pushChart(kmh,bf,t);const isAbove=bf>=ALERT_BF;if(isAbove){setStatus('wind-alert',`Wind alert! BF ${bf.toFixed(1)} — ${bfInfo.desc}`);document.getElementById('alertBanner').classList.add('show');document.getElementById('alertMsg').textContent=`${kmh.toFixed(1)} km/h · BF ${bf.toFixed(1)} · Gusts: ${gust.toFixed(1)} km/h · ${toDir(dir)}`;addLog(`💨 ALERT BF ${bf.toFixed(1)} — ${kmh.toFixed(1)} km/h from ${toDir(dir)}`,true);if(!wasAbove)sendNotif(bf.toFixed(1),kmh,bfInfo.desc,toDir(dir));}else{setStatus('online',`Online · BF ${bf.toFixed(1)} · ${bfInfo.desc}`);document.getElementById('alertBanner').classList.remove('show');if(wasAbove)addLog(`Wind calmed · BF ${bf.toFixed(1)} · ${kmh.toFixed(1)} km/h`);else addLog(`OK · BF ${bf.toFixed(1)} · ${kmh.toFixed(1)} km/h · ${toDir(dir)}`);}wasAbove=isAbove;}catch(e){setStatus('error','Parse error: '+e.message);addLog('Parse error: '+e.message+' — raw: '+JSON.stringify(data).slice(0,80));}}
-  function sendNotif(bf,kmh,desc,dir){if(Notification.permission==='granted')new Notification(`💨 Wind Alert IORTHO1 — BF ${bf}!`,{body:`${desc} · ${kmh.toFixed(1)} km/h from ${dir}`});}
-  async function requestNotifPermission(){const p=await Notification.requestPermission();if(p==='granted'){document.getElementById('notifBar').classList.remove('show');addLog('Notifications enabled ✓');}}
-  async function checkNow(){addLog('Manual check...');await fetchWeather();if(isRunning)startCountdown();}
-  function toggleMonitor(){const btn=document.getElementById('startBtn');if(!isRunning){isRunning=true;btn.textContent='⏹ Stop Monitoring';addLog('Wind monitoring started · every 3 min');fetchWeather();startCountdown();monitorInterval=setInterval(()=>{fetchWeather();startCountdown();},CHECK_INTERVAL);}else{isRunning=false;clearInterval(monitorInterval);clearInterval(countdown);btn.textContent='▶ Start Monitoring';document.getElementById('nextCheck').textContent='';setStatus('','Monitoring stopped');addLog('Monitoring stopped');}}
-  if('Notification'in window&&Notification.permission!=='granted')document.getElementById('notifBar').classList.add('show');
+
+  const API_KEY = '96a7fe833f0c4f7fa7fe833f0cff7f97';
+  const STATION_ID = 'IORTHO1';
+  const CHECK_INTERVAL = 3 * 60 * 1000;
+  const ALERT_BF = 3.5;
+
+  const PROXIES = [
+    function(u){ return 'https://corsproxy.io/?url=' + encodeURIComponent(u); },
+    function(u){ return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u); },
+    function(u){ return 'https://thingproxy.freeboard.io/fetch/' + u; }
+  ];
+
+  const TARGET_URL = 'https://api.weather.com/v2/pws/observations/current?stationId=' + STATION_ID + '&format=json&units=m&apiKey=' + API_KEY;
+
+  var BF_SCALE = [
+    {bf:0,  minKmh:0,   maxKmh:1,   desc:'Calm',            color:'#94a3b8'},
+    {bf:1,  minKmh:1,   maxKmh:6,   desc:'Light Air',       color:'#34d399'},
+    {bf:2,  minKmh:6,   maxKmh:12,  desc:'Light Breeze',    color:'#34d399'},
+    {bf:3,  minKmh:12,  maxKmh:20,  desc:'Gentle Breeze',   color:'#fbbf24'},
+    {bf:4,  minKmh:20,  maxKmh:29,  desc:'Moderate Breeze', color:'#fb923c'},
+    {bf:5,  minKmh:29,  maxKmh:39,  desc:'Fresh Breeze',    color:'#f87171'},
+    {bf:6,  minKmh:39,  maxKmh:50,  desc:'Strong Breeze',   color:'#ef4444'},
+    {bf:7,  minKmh:50,  maxKmh:62,  desc:'Near Gale',       color:'#dc2626'},
+    {bf:8,  minKmh:62,  maxKmh:75,  desc:'Gale',            color:'#b91c1c'},
+    {bf:9,  minKmh:75,  maxKmh:89,  desc:'Strong Gale',     color:'#991b1b'},
+    {bf:10, minKmh:89,  maxKmh:103, desc:'Storm',           color:'#7f1d1d'},
+    {bf:11, minKmh:103, maxKmh:118, desc:'Violent Storm',   color:'#450a0a'},
+    {bf:12, minKmh:118, maxKmh:999, desc:'Hurricane',       color:'#450a0a'}
+  ];
+
+  function getIntBf(kmh) {
+    for (var i = 0; i < BF_SCALE.length; i++) {
+      if (kmh < BF_SCALE[i].maxKmh) return i;
+    }
+    return 12;
+  }
+
+  function getDecimalBf(kmh) {
+    var idx = getIntBf(kmh);
+    if (idx === 0) return 0;
+    var entry = BF_SCALE[idx];
+    var fraction = (kmh - entry.minKmh) / (entry.maxKmh - entry.minKmh);
+    var result = idx + fraction;
+    return Math.min(Math.round(result * 10) / 10, 12);
+  }
+
+  function toDir(deg) {
+    var dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+    return dirs[Math.round(deg / 22.5) % 16];
+  }
+
+  // Chart — Beaufort only
+  var chartLabels = [];
+  var chartBfVals = [];
+  var MAX_PTS = 20;
+
+  var windChart = new Chart(document.getElementById('windChart').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: chartLabels,
+      datasets: [{
+        label: 'Beaufort',
+        data: chartBfVals,
+        borderColor: '#a78bfa',
+        backgroundColor: 'rgba(167,139,250,0.10)',
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointBackgroundColor: '#a78bfa',
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 400 },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#111827',
+          borderColor: '#1e2d45',
+          borderWidth: 1,
+          titleColor: '#a78bfa',
+          bodyColor: '#e2e8f0',
+          callbacks: {
+            label: function(c) { return ' BF ' + c.parsed.y.toFixed(1); }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#64748b', font: { family: 'DM Mono', size: 9 }, maxRotation: 0 },
+          grid:  { color: 'rgba(30,45,69,0.6)' }
+        },
+        y: {
+          min: 0, max: 12,
+          ticks: { color: '#a78bfa', font: { family: 'DM Mono', size: 10 }, stepSize: 1 },
+          grid:  { color: 'rgba(30,45,69,0.6)' },
+          title: { display: true, text: 'BF', color: '#a78bfa', font: { size: 9 } }
+        }
+      }
+    }
+  });
+
+  function pushChart(bf, timeLabel) {
+    if (chartLabels.length >= MAX_PTS) {
+      chartLabels.shift();
+      chartBfVals.shift();
+    }
+    chartLabels.push(timeLabel);
+    chartBfVals.push(bf);
+
+    // Color points by BF level
+    windChart.data.datasets[0].pointBackgroundColor = chartBfVals.map(function(v) {
+      return BF_SCALE[Math.min(Math.floor(v), 12)].color;
+    });
+
+    windChart.update();
+    updateTrend();
+  }
+
+  function updateTrend() {
+    var badge  = document.getElementById('trendBadge');
+    var inline = document.getElementById('trendInline');
+    if (chartBfVals.length < 3) return;
+    var older  = chartBfVals[chartBfVals.length - 3];
+    var newer  = chartBfVals[chartBfVals.length - 1];
+    if (newer > older + 0.2) {
+      badge.textContent  = '↑ Strengthening'; badge.className = 'trend-badge up';
+      inline.textContent = '↑ rising';        inline.style.color = '#f87171';
+    } else if (newer < older - 0.2) {
+      badge.textContent  = '↓ Weakening'; badge.className = 'trend-badge down';
+      inline.textContent = '↓ falling';   inline.style.color = '#34d399';
+    } else {
+      badge.textContent  = '→ Steady'; badge.className = 'trend-badge steady';
+      inline.textContent = '→ steady'; inline.style.color = '#fbbf24';
+    }
+  }
+
+  function highlightRow(bfInt) {
+    document.querySelectorAll('#bfTable tr').forEach(function(r) { r.classList.remove('active-row'); });
+    var row = document.querySelector('#bfTable tr[data-bf="' + bfInt + '"]');
+    if (row) row.classList.add('active-row');
+  }
+
+  var monitorInterval = null;
+  var countdown = null;
+  var secondsLeft = 0;
+  var isRunning = false;
+  var wasAbove = false;
+
+  function addLog(msg, isAlert) {
+    var t = new Date().toTimeString().slice(0, 5);
+    var el = document.createElement('div');
+    el.className = 'log-entry' + (isAlert ? ' wind-alert' : '');
+    el.innerHTML = '<span class="time">' + t + '</span><span>' + msg + '</span>';
+    var log = document.getElementById('logEntries');
+    log.insertBefore(el, log.firstChild);
+    while (log.children.length > 20) log.removeChild(log.lastChild);
+  }
+
+  function setStatus(type, text) {
+    document.getElementById('statusDot').className = 'status-dot ' + type;
+    document.getElementById('statusText').textContent = text;
+  }
+
+  function startCountdown() {
+    secondsLeft = CHECK_INTERVAL / 1000;
+    clearInterval(countdown);
+    countdown = setInterval(function() {
+      secondsLeft--;
+      var m = Math.floor(secondsLeft / 60);
+      var s = secondsLeft % 60;
+      document.getElementById('nextCheck').textContent = 'Next: ' + m + ':' + (s < 10 ? '0' : '') + s;
+      if (secondsLeft <= 0) clearInterval(countdown);
+    }, 1000);
+  }
+
+  async function fetchWeather() {
+    document.getElementById('errorMsg').classList.remove('show');
+    var data = null;
+    var lastErr = null;
+
+    for (var i = 0; i < PROXIES.length; i++) {
+      try {
+        var res = await fetch(PROXIES[i](TARGET_URL), { headers: { 'Accept': 'application/json' } });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var text = await res.text();
+        data = JSON.parse(text);
+        break;
+      } catch(e) {
+        lastErr = e;
+      }
+    }
+
+    if (!data) {
+      setStatus('error', 'Check failed');
+      document.getElementById('errorMsg').textContent = '⚠ Could not fetch data. Check internet connection.';
+      document.getElementById('errorMsg').classList.add('show');
+      addLog('Error: ' + (lastErr ? lastErr.message : 'unknown'), false);
+      return;
+    }
+
+    try {
+      var obs   = data.observations[0];
+      var m     = obs.metric || {};
+      var kmh   = parseFloat(m.windSpeed) || 0;
+      var gust  = parseFloat(m.windGust)  || 0;
+      var dir   = parseFloat(obs.winddir) || parseFloat(m.winddir) || 0;
+      var temp  = (m.temp !== null && m.temp !== undefined) ? m.temp : '--';
+
+      var bfInt  = getIntBf(kmh);
+      var bfDec  = getDecimalBf(kmh);
+      var bfInfo = BF_SCALE[bfInt];
+      var timeLabel = new Date().toTimeString().slice(0, 5);
+
+      document.getElementById('windKmh').textContent = kmh.toFixed(1);
+      document.getElementById('windBf').textContent  = bfDec.toFixed(1);
+      document.getElementById('windBf').className    = 'wind-value big bf-' + bfInt;
+      document.getElementById('gustVal').textContent = gust.toFixed(1) + ' km/h';
+      document.getElementById('dirVal').textContent  = toDir(dir);
+      document.getElementById('tempVal').textContent = temp + '°C';
+
+      var band = document.getElementById('bfBand');
+      band.textContent         = 'BF ' + bfDec.toFixed(1) + ' — ' + bfInfo.desc;
+      band.style.color         = bfInfo.color;
+      band.style.borderColor   = bfInfo.color + '55';
+      band.style.background    = bfInfo.color + '11';
+
+      highlightRow(bfInt);
+      pushChart(bfDec, timeLabel);
+
+      var isAbove = bfDec >= ALERT_BF;
+
+      if (isAbove) {
+        setStatus('wind-alert', 'Wind alert! BF ' + bfDec.toFixed(1) + ' — ' + bfInfo.desc);
+        document.getElementById('alertBanner').classList.add('show');
+        document.getElementById('alertMsg').textContent = kmh.toFixed(1) + ' km/h · BF ' + bfDec.toFixed(1) + ' · Gusts: ' + gust.toFixed(1) + ' km/h · ' + toDir(dir);
+        addLog('💨 ALERT BF ' + bfDec.toFixed(1) + ' — ' + kmh.toFixed(1) + ' km/h from ' + toDir(dir), true);
+        if (!wasAbove) sendNotif(bfDec, kmh, bfInfo.desc, toDir(dir));
+      } else {
+        setStatus('online', 'Online · BF ' + bfDec.toFixed(1) + ' · ' + bfInfo.desc);
+        document.getElementById('alertBanner').classList.remove('show');
+        if (wasAbove) addLog('Wind calmed · BF ' + bfDec.toFixed(1) + ' · ' + kmh.toFixed(1) + ' km/h', false);
+        else          addLog('OK · BF ' + bfDec.toFixed(1) + ' · ' + kmh.toFixed(1) + ' km/h · ' + toDir(dir), false);
+      }
+
+      wasAbove = isAbove;
+
+    } catch(e) {
+      setStatus('error', 'Parse error');
+      addLog('Parse error: ' + e.message, false);
+    }
+  }
+
+  function sendNotif(bf, kmh, desc, dir) {
+    if (Notification.permission === 'granted') {
+      new Notification('💨 Wind Alert IORTHO1 — BF ' + bf.toFixed(1) + '!', {
+        body: desc + ' · ' + kmh.toFixed(1) + ' km/h from ' + dir
+      });
+    }
+  }
+
+  async function requestNotifPermission() {
+    var p = await Notification.requestPermission();
+    if (p === 'granted') {
+      document.getElementById('notifBar').classList.remove('show');
+      addLog('Notifications enabled ✓', false);
+    }
+  }
+
+  async function checkNow() {
+    addLog('Manual check...', false);
+    await fetchWeather();
+    if (isRunning) startCountdown();
+  }
+
+  function toggleMonitor() {
+    var btn = document.getElementById('startBtn');
+    if (!isRunning) {
+      isRunning = true;
+      btn.textContent = '⏹ Stop Monitoring';
+      addLog('Wind monitoring started · every 3 min', false);
+      fetchWeather();
+      startCountdown();
+      monitorInterval = setInterval(function() {
+        fetchWeather();
+        startCountdown();
+      }, CHECK_INTERVAL);
+    } else {
+      isRunning = false;
+      clearInterval(monitorInterval);
+      clearInterval(countdown);
+      btn.textContent = '▶ Start Monitoring';
+      document.getElementById('nextCheck').textContent = '';
+      setStatus('', 'Monitoring stopped');
+      addLog('Monitoring stopped', false);
+    }
+  }
+
+  if ('Notification' in window && Notification.permission !== 'granted') {
+    document.getElementById('notifBar').classList.add('show');
+  }
+
 </script>
 </body>
 </html>
