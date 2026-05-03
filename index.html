@@ -174,11 +174,10 @@
 </div>
 
 <script>
-  const API_KEY    = 'D1H2w36a';
+  const API_KEY    = '96a7fe833f0c4f7fa7fe833f0cff7f97';
   const STATION_ID = 'IORTHO1';
   const CHECK_INTERVAL = 5 * 60 * 1000;
 
-  // Try multiple CORS proxies in order
   const PROXIES = [
     (url) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
     (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
@@ -192,7 +191,6 @@
   let secondsLeft = 0;
   let isRunning = false;
   let wasRaining = false;
-  let currentProxy = 0;
 
   // Rain drops
   const rainBg = document.getElementById('rainBg');
@@ -247,11 +245,9 @@
     let data = null;
     let lastErr = null;
 
-    // Try each proxy until one works
     for (let i = 0; i < PROXIES.length; i++) {
       try {
         data = await tryFetch(i);
-        currentProxy = i;
         break;
       } catch (err) {
         lastErr = err;
@@ -261,7 +257,7 @@
     if (!data) {
       setStatus('error', 'Check failed');
       const errEl = document.getElementById('errorMsg');
-      errEl.textContent = '⚠ Could not fetch data. Check your internet connection or API key.';
+      errEl.textContent = '⚠ Could not fetch data. Check your internet connection.';
       errEl.classList.add('show');
       addLog('Error: ' + (lastErr ? lastErr.message : 'unknown'));
       return;
