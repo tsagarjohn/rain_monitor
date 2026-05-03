@@ -299,6 +299,37 @@
     }, 1000);
   }
 
+  // ── Beaufort ──
+  var BF_SCALE = [
+    {max:1,   desc:'Calm'},
+    {max:6,   desc:'Light Air'},
+    {max:12,  desc:'Light Breeze'},
+    {max:20,  desc:'Gentle Breeze'},
+    {max:29,  desc:'Moderate Breeze'},
+    {max:39,  desc:'Fresh Breeze'},
+    {max:50,  desc:'Strong Breeze'},
+    {max:62,  desc:'Near Gale'},
+    {max:75,  desc:'Gale'},
+    {max:89,  desc:'Strong Gale'},
+    {max:103, desc:'Storm'},
+    {max:118, desc:'Violent Storm'},
+    {max:999, desc:'Hurricane'}
+  ];
+
+  function toDecimalBf(kmh) {
+    var idx = 0;
+    for (var i = 0; i < BF_SCALE.length; i++) {
+      if (kmh < BF_SCALE[i].max) { idx = i; break; }
+      idx = i;
+    }
+    if (idx === 0) return { bf: 0, desc: BF_SCALE[0].desc };
+    var prev = idx > 0 ? BF_SCALE[idx-1].max : 0;
+    var curr = BF_SCALE[idx].max;
+    var fraction = (kmh - prev) / (curr - prev);
+    var bf = Math.min(Math.round((idx + fraction) * 10) / 10, 12);
+    return { bf: bf, desc: BF_SCALE[idx].desc };
+  }
+
   // ── Fetch PWS ──
   async function fetchPWS() {
     document.getElementById('errorMsg').classList.remove('show');
@@ -334,7 +365,9 @@
       document.getElementById('tempVal').textContent   = temp + ' °C';
       document.getElementById('humidVal').textContent  = humidity + ' %';
       document.getElementById('accumVal').textContent  = precipTotal.toFixed(1) + ' mm';
-      document.getElementById('windVal').textContent   = windSpeed + ' km/h';
+      var bfResult = toDecimalBf(windSpeed);
+      document.getElementById('windVal').textContent  = 'BF ' + bfResult.bf.toFixed(1);
+      document.getElementById('windDesc').textContent = bfResult.desc + ' · ' + windSpeed + ' km/h';
 
       var isRaining = precipRate > 0;
       if (isRaining) {
