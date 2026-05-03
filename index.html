@@ -80,15 +80,6 @@
   .seb-precip-label { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
   .seb-precip-unit { font-size:12px; color:var(--muted); }
 
-  .seb-status-dot { width:8px; height:8px; border-radius:50%; background:var(--muted); display:inline-block; margin-right:6px; }
-  .seb-status-dot.online { background:var(--dry); box-shadow:0 0 6px var(--dry); animation:pulse-dot 2s infinite; }
-  .seb-status-dot.error  { background:var(--error); }
-
-  .alert-banner { background:rgba(56,189,248,0.1); border:1px solid var(--accent); border-radius:12px; padding:16px 20px; font-size:13px; color:var(--accent); display:none; align-items:center; gap:12px; margin-bottom:16px; animation:slideIn 0.4s ease; }
-  .alert-banner.show { display:flex; }
-  .alert-banner .icon { font-size:24px; }
-  @keyframes slideIn { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
-
   .controls { display:flex; gap:10px; }
   button { flex:1; padding:14px; border-radius:10px; border:none; font-family:'DM Mono',monospace; font-size:12px; letter-spacing:1px; cursor:pointer; transition:all 0.2s; }
   .btn-primary   { background:var(--accent); color:#0a0f1a; font-weight:500; }
@@ -96,23 +87,8 @@
   .btn-secondary { background:transparent; border:1px solid var(--border) !important; color:var(--muted); }
   .btn-secondary:hover { border-color:var(--accent) !important; color:var(--accent); }
 
-  .log-card { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:16px 20px; margin-top:16px; }
-  .log-title { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
-  .log-entries { max-height:140px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
-  .log-entry { font-size:11px; color:var(--muted); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.03); display:flex; gap:10px; }
-  .log-entry .time { color:var(--accent); min-width:55px; }
-  .log-entry.rain-event { color:var(--rain); }
-  .log-entry.rain-event .time { color:var(--rain); }
-
-  .notif-bar { background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.3); border-radius:10px; padding:12px 16px; font-size:11px; color:var(--warn); margin-bottom:16px; display:none; align-items:center; justify-content:space-between; gap:10px; }
-  .notif-bar.show { display:flex; }
-  .notif-bar button { flex:none; padding:6px 14px; background:var(--warn); color:#0a0f1a; border-radius:6px; font-size:10px; }
-
   .error-msg { font-size:11px; color:var(--error); text-align:center; margin-top:8px; display:none; }
   .error-msg.show { display:block; }
-  .api-note { font-size:10px; color:var(--muted); text-align:center; margin-top:12px; line-height:1.8; }
-
-  .divider { border:none; border-top:1px solid var(--border); margin:8px 0 20px; opacity:0.4; }
 </style>
 </head>
 <body>
@@ -125,19 +101,6 @@
     <h1>IORTHO<span>1</span></h1>
     <div class="subtitle">Pateles · Orthounio, GR · 485m</div>
   </header>
-
-  <div class="notif-bar" id="notifBar">
-    <span>⚠ Enable notifications for rain alerts</span>
-    <button onclick="requestNotifPermission()">Enable</button>
-  </div>
-
-  <div class="alert-banner" id="alertBanner">
-    <span class="icon">🌧</span>
-    <div>
-      <strong>Rain detected!</strong><br>
-      <span id="alertMsg" style="font-size:11px;opacity:0.8;"></span>
-    </div>
-  </div>
 
   <!-- ── PWS IORTHO1 ── -->
   <div class="card">
@@ -152,9 +115,17 @@
       <div class="next-check" id="nextCheck"></div>
     </div>
 
+    <!-- Precip Today — big, on top -->
     <div class="precip-display">
+      <div class="precip-label">Precip Today</div>
+      <div class="precip-value" id="accumVal">--</div>
+      <div class="precip-unit">mm</div>
+    </div>
+
+    <!-- Precip Rate — below -->
+    <div class="precip-display" style="padding-top:16px;">
       <div class="precip-label">Precip Rate</div>
-      <div class="precip-value" id="precipValue">--</div>
+      <div class="precip-value" style="font-size:44px;" id="precipValue">--</div>
       <div class="precip-unit">mm / hr</div>
     </div>
 
@@ -166,10 +137,6 @@
       <div class="weather-item">
         <div class="weather-item-label">Humidity</div>
         <div class="weather-item-value" id="humidVal">--</div>
-      </div>
-      <div class="weather-item">
-        <div class="weather-item-label">Precip Today</div>
-        <div class="weather-item-value" id="accumVal">--</div>
       </div>
       <div class="weather-item">
         <div class="weather-item-label">Wind</div>
@@ -225,17 +192,7 @@
     <button class="btn-secondary" onclick="checkNow()">Check Now</button>
   </div>
 
-  <div class="log-card">
-    <div class="log-title">Activity Log</div>
-    <div class="log-entries" id="logEntries">
-      <div class="log-entry"><span class="time">--:--</span><span>Monitor not started</span></div>
-    </div>
-  </div>
 
-  <div class="api-note">
-    PWS IORTHO1 + Sebronas meteo.gr · Checks every 5 minutes<br>
-    Keep this tab open to receive alerts
-  </div>
 </div>
 
 <script>
@@ -267,15 +224,7 @@
   }
 
   // ── Helpers ──
-  function addLog(msg, isRain) {
-    var t = new Date().toTimeString().slice(0, 5);
-    var el = document.createElement('div');
-    el.className = 'log-entry' + (isRain ? ' rain-event' : '');
-    el.innerHTML = '<span class="time">' + t + '</span><span>' + msg + '</span>';
-    var log = document.getElementById('logEntries');
-    log.insertBefore(el, log.firstChild);
-    while (log.children.length > 20) log.removeChild(log.lastChild);
-  }
+  function addLog(msg, isRain) {}  // kept as stub so no errors if called
 
   function setStatus(type, text) {
     document.getElementById('statusDot').className = 'status-dot ' + type;
@@ -286,7 +235,6 @@
   var countdown = null;
   var secondsLeft = 0;
   var isRunning = false;
-  var wasRaining = false;
 
   function startCountdown() {
     secondsLeft = CHECK_INTERVAL / 1000;
@@ -365,7 +313,7 @@
 
       document.getElementById('tempVal').textContent   = temp + ' °C';
       document.getElementById('humidVal').textContent  = humidity + ' %';
-      document.getElementById('accumVal').textContent  = precipTotal.toFixed(1) + ' mm';
+      document.getElementById('accumVal').textContent  = precipTotal.toFixed(1);
       var bfResult = toDecimalBf(windSpeed);
       document.getElementById('windVal').textContent  = 'BF ' + bfResult.bf.toFixed(1);
       document.getElementById('windDesc').textContent = bfResult.desc + ' · ' + windSpeed + ' km/h';
@@ -373,20 +321,11 @@
       var isRaining = precipRate > 0;
       if (isRaining) {
         setStatus('rain', 'Station online · Rain detected!');
-        document.getElementById('alertBanner').classList.add('show');
-        document.getElementById('alertMsg').textContent = 'Rate: ' + precipRate.toFixed(1) + ' mm/hr · Total today: ' + precipTotal.toFixed(1) + ' mm';
-        addLog('🌧 RAIN — ' + precipRate.toFixed(1) + ' mm/hr', true);
-        if (!wasRaining) sendNotification(precipRate, precipTotal);
       } else {
         setStatus('online', 'Station online · No rain');
-        document.getElementById('alertBanner').classList.remove('show');
-        if (wasRaining) addLog('Rain stopped · All clear', false);
-        else addLog('PWS OK · Dry · ' + temp + '°C · ' + humidity + '%', false);
       }
-      wasRaining = isRaining;
     } catch(e) {
       setStatus('error', 'PWS parse error');
-      addLog('PWS parse error: ' + e.message, false);
     }
   }
 
@@ -461,12 +400,9 @@
       sebRainEl.textContent = sebRainVal.toFixed(1);
       sebRainEl.className = 'seb-precip-big' + (sebRainVal > 0 ? ' raining' : '');
 
-      addLog('Sebronas OK · ' + sebTemp + ' · Rain: ' + sebRainVal.toFixed(1) + ' mm', false);
-
     } catch(e) {
       sebErr.textContent = '⚠ Could not parse Sebronas page.';
       sebErr.classList.add('show');
-      addLog('Sebronas parse error: ' + e.message, false);
     }
   }
 
@@ -493,7 +429,6 @@
   }
 
   async function checkNow() {
-    addLog('Manual check...', false);
     await fetchAll();
     if (isRunning) startCountdown();
   }
@@ -503,7 +438,6 @@
     if (!isRunning) {
       isRunning = true;
       btn.textContent = '⏹ Stop Monitoring';
-      addLog('Monitoring started · every 5 min', false);
       fetchAll();
       startCountdown();
       monitorInterval = setInterval(function() {
@@ -517,12 +451,7 @@
       btn.textContent = '▶ Start Monitoring';
       document.getElementById('nextCheck').textContent = '';
       setStatus('', 'Monitoring stopped');
-      addLog('Monitoring stopped', false);
     }
-  }
-
-  if ('Notification' in window && Notification.permission !== 'granted') {
-    document.getElementById('notifBar').classList.add('show');
   }
 </script>
 </body>
