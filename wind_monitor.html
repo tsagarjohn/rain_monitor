@@ -32,14 +32,18 @@
   .status-text { font-size:12px; color:var(--muted); }
   .next-check  { font-size:11px; color:var(--muted); }
 
-  .wind-main { display:flex; align-items:center; justify-content:center; gap:48px; padding:16px 0 20px; border-bottom:1px solid var(--border); margin-bottom:16px; }
+  .wind-main { display:flex; align-items:center; justify-content:flex-start; gap:48px; padding:16px 0 20px; border-bottom:1px solid var(--border); margin-bottom:16px; }
   .wind-block { text-align:center; }
   .wind-label { font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
   .wind-value { font-family:'Syne',sans-serif; font-weight:800; line-height:1; transition:color 0.5s; }
   .wind-value.big { font-size:72px; }
   .wind-value.med { font-size:36px; }
   .wind-unit  { font-size:12px; color:var(--muted); margin-top:4px; }
-  .trend-inline { margin-top:8px; font-size:13px; color:var(--muted); letter-spacing:1px; transition:color 0.4s; min-height:18px; }
+  .trend-inline { margin-top:10px; font-size:13px; color:var(--muted); letter-spacing:1px; transition:color 0.4s; min-height:20px; display:flex; align-items:center; justify-content:center; gap:6px; }
+  .trend-dot { width:9px; height:9px; border-radius:50%; display:inline-block; flex-shrink:0; }
+  .trend-dot.up     { background:#f87171; box-shadow:0 0 6px #f87171; }
+  .trend-dot.down   { background:#34d399; box-shadow:0 0 6px #34d399; }
+  .trend-dot.steady { background:#fbbf24; box-shadow:0 0 6px #fbbf24; }
 
   .bf-0  { color:#94a3b8 } .bf-1  { color:#34d399 } .bf-2  { color:#34d399 }
   .bf-3  { color:#fbbf24 } .bf-4  { color:#fb923c } .bf-5  { color:#f87171 }
@@ -131,15 +135,18 @@
 
     <div class="wind-main">
       <div class="wind-block">
-        <div class="wind-label">Wind Speed</div>
-        <div class="wind-value med" id="windKmh">--</div>
-        <div class="wind-unit">km/h</div>
-      </div>
-      <div class="wind-block">
         <div class="wind-label">Beaufort</div>
         <div class="wind-value big" id="windBf">--</div>
         <div class="wind-unit">BF</div>
-        <div class="trend-inline" id="trendInline">—</div>
+        <div class="trend-inline" id="trendInline">
+          <span class="trend-dot" id="trendDot"></span>
+          <span id="trendText">—</span>
+        </div>
+      </div>
+      <div class="wind-block">
+        <div class="wind-label">Wind Speed</div>
+        <div class="wind-value med" id="windKmh">--</div>
+        <div class="wind-unit">km/h</div>
       </div>
     </div>
 
@@ -332,19 +339,23 @@
 
   function updateTrend() {
     var badge  = document.getElementById('trendBadge');
-    var inline = document.getElementById('trendInline');
+    var dot    = document.getElementById('trendDot');
+    var txt    = document.getElementById('trendText');
     if (chartBfVals.length < 3) return;
     var older  = chartBfVals[chartBfVals.length - 3];
     var newer  = chartBfVals[chartBfVals.length - 1];
     if (newer > older + 0.2) {
-      badge.textContent  = '↑ Strengthening'; badge.className = 'trend-badge up';
-      inline.textContent = '↑ rising';        inline.style.color = '#f87171';
+      badge.textContent = '↑ Strengthening'; badge.className = 'trend-badge up';
+      dot.className = 'trend-dot up';
+      txt.textContent = '↑ rising'; txt.style.color = '#f87171';
     } else if (newer < older - 0.2) {
-      badge.textContent  = '↓ Weakening'; badge.className = 'trend-badge down';
-      inline.textContent = '↓ falling';   inline.style.color = '#34d399';
+      badge.textContent = '↓ Weakening'; badge.className = 'trend-badge down';
+      dot.className = 'trend-dot down';
+      txt.textContent = '↓ falling'; txt.style.color = '#34d399';
     } else {
-      badge.textContent  = '→ Steady'; badge.className = 'trend-badge steady';
-      inline.textContent = '→ steady'; inline.style.color = '#fbbf24';
+      badge.textContent = '→ Steady'; badge.className = 'trend-badge steady';
+      dot.className = 'trend-dot steady';
+      txt.textContent = '→ steady'; txt.style.color = '#fbbf24';
     }
   }
 
