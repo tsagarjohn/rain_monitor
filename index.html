@@ -209,6 +209,7 @@
       <div class="seb-item">
         <div class="seb-item-label">Wind</div>
         <div class="seb-item-value" id="sebWind">--</div>
+        <div style="font-size:9px;color:var(--muted);margin-top:3px;" id="sebWindDesc">--</div>
       </div>
       <div class="seb-item">
         <div class="seb-item-label">Pressure</div>
@@ -435,8 +436,16 @@
 
       // Wind — "X.X Km/h at DIR"
       var windM = html.match(/([\d.]+)\s*[Kk]m\/h\s+at\s+([A-Z]+)/);
-      var sebWind = windM ? windM[1] + ' km/h ' + windM[2] : '--';
-      document.getElementById('sebWind').textContent = sebWind;
+      if (windM) {
+        var sebWindKmh = parseFloat(windM[1]);
+        var sebWindDir = windM[2];
+        var sebBf = toDecimalBf(sebWindKmh);
+        document.getElementById('sebWind').textContent = 'BF ' + sebBf.bf.toFixed(1) + ' · ' + sebWindDir;
+        document.getElementById('sebWindDesc').textContent = sebBf.desc + ' · ' + sebWindKmh + ' km/h';
+      } else {
+        document.getElementById('sebWind').textContent = '--';
+        document.getElementById('sebWindDesc').textContent = '--';
+      }
 
       // Barometer
       var pressM = html.match(/([\d.]+)\s*hPa/);
