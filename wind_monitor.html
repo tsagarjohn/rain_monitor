@@ -111,19 +111,6 @@
     <div class="subtitle">Pateles · Orthounio, GR · 485m · checks every 3 min</div>
   </header>
 
-  <div class="notif-bar" id="notifBar">
-    <span>⚠ Enable notifications for wind alerts</span>
-    <button onclick="requestNotifPermission()">Enable</button>
-  </div>
-
-  <div class="alert-banner" id="alertBanner">
-    <span class="icon">💨</span>
-    <div>
-      <strong>Wind alert! Above Beaufort 3.5</strong><br>
-      <span id="alertMsg" style="font-size:11px;opacity:0.8;"></span>
-    </div>
-  </div>
-
   <div class="card">
     <div class="status-row">
       <div>
@@ -459,7 +446,7 @@
         document.getElementById('alertBanner').classList.add('show');
         document.getElementById('alertMsg').textContent = kmh.toFixed(1) + ' km/h · BF ' + bfDec.toFixed(1) + ' · Gusts: ' + gust.toFixed(1) + ' km/h · ' + toDir(dir);
         addLog('💨 ALERT BF ' + bfDec.toFixed(1) + ' — ' + kmh.toFixed(1) + ' km/h from ' + toDir(dir), true);
-        if (!wasAbove) sendNotif(bfDec, kmh, bfInfo.desc, toDir(dir));
+        if (!wasAbove) {} // notification removed
       } else {
         setStatus('online', 'Online · BF ' + bfDec.toFixed(1) + ' · ' + bfInfo.desc);
         document.getElementById('alertBanner').classList.remove('show');
@@ -472,22 +459,6 @@
     } catch(e) {
       setStatus('error', 'Parse error');
       addLog('Parse error: ' + e.message, false);
-    }
-  }
-
-  function sendNotif(bf, kmh, desc, dir) {
-    if (Notification.permission === 'granted') {
-      new Notification('💨 Wind Alert IORTHO1 — BF ' + bf.toFixed(1) + '!', {
-        body: desc + ' · ' + kmh.toFixed(1) + ' km/h from ' + dir
-      });
-    }
-  }
-
-  async function requestNotifPermission() {
-    var p = await Notification.requestPermission();
-    if (p === 'granted') {
-      document.getElementById('notifBar').classList.remove('show');
-      addLog('Notifications enabled ✓', false);
     }
   }
 
@@ -520,9 +491,7 @@
     }
   }
 
-  if ('Notification' in window && Notification.permission !== 'granted') {
-    document.getElementById('notifBar').classList.add('show');
-  }
+  if ('Notification' in window && Notification.permission !== 'granted') {}
 
 </script>
 </body>
